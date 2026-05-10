@@ -1,0 +1,66 @@
+# AutoDL 云端训练配置 (继承 train_config.yaml，覆盖云端参数)
+
+model:
+  architecture: enhanced-yolov8n
+  num_classes: 1
+  class_names: ['pedestrian']
+  img_size: 640
+  pretrained_weights: yolov8n.pt
+
+training:
+  epochs: 100
+  batch_size: 32       # AutoDL GPU 显存更大，batch 翻倍
+  optimizer: AdamW
+  lr0: 0.01
+  lrf: 0.01
+  momentum: 0.937
+  weight_decay: 0.0005
+  warmup_epochs: 3
+  warmup_momentum: 0.8
+  warmup_bias_lr: 0.1
+  scheduler: cosine
+  cos_lr: true
+  close_mosaic: 10
+  workers: 4            # AutoDL 实例 CPU 核心较少
+  device: 0
+  amp: true
+
+losses:
+  box_gain: 7.5
+  cls_gain: 0.5
+  dfl_gain: 1.5
+  wiou_delta: 1.9
+
+augmentation:
+  mosaic: 1.0
+  mixup: 0.15
+  degrees: 0.0
+  translate: 0.1
+  scale: 0.5
+  flipud: 0.0
+  fliplr: 0.5
+  hsv_h: 0.015
+  hsv_s: 0.7
+  hsv_v: 0.4
+
+data:
+  dataset_name: LLVIP
+  data_dir: datasets/LLVIP
+  train_images_ir: datasets/LLVIP/infrared/train
+  train_images_vis: datasets/LLVIP/visible/train
+  test_images_ir: datasets/LLVIP/infrared/test
+  test_images_vis: datasets/LLVIP/visible/test
+  annotations: datasets/LLVIP/Annotations
+  train_split: 0.85
+  val_split: 0.15
+
+evaluation:
+  conf_threshold: 0.25
+  iou_threshold: 0.45
+  metrics:
+    - mAP_0.5
+    - mAP_0.5:0.95
+    - precision
+    - recall
+    - miss_rate
+    - fps

@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Datasets (large image files)
+datasets/
+LLVIP.zip
+
+# Model files (large binary)
+*.pt
+*.pth
+*.onnx
+models/
+
+# Build output
+dist/
+build/
+autodl_upload/
+
+# Claude
+.claude/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Docker volumes
+mysql_data/
+media_data/
+
+# Logs
+*.log
+
+# Jupyter
+.ipynb_checkpoints/

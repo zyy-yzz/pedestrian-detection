@@ -1,0 +1,61 @@
+version: '3.9'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend
+    expose:
+      - "8000"
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ./models:/app/models:ro
+      - media_data:/app/media
+    environment:
+      DATABASE_URL: mysql+pymysql://user:${MYSQL_PASSWORD}@db:3306/pedestrian_detection
+      SECRET_KEY: ${SECRET_KEY}
+      MODEL_PATH: /app/models/enhanced_yolov8n.pt
+      CONF_THRESHOLD: "0.25"
+      IOU_THRESHOLD: "0.45"
+      ENV: development
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: pedestrian_detection
+      MYSQL_USER: user
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+volumes:
+  mysql_data:
+  media_data:
+
+networks:
+  app-network:
+    driver: bridge
