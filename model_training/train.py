@@ -161,6 +161,9 @@ def prepare_llvip_dataset(cfg: dict) -> dict:
     # Create val split: random 15% of train labels moved to val
     _split_train_val(data_dir, val_ratio=0.15)
 
+    # Link infrared images into images/ dir to match label splits
+    _link_images(data_dir)
+
     # Create data.yaml for ultralytics
     data_yaml = {
         'path': str(data_dir.resolve()),
@@ -237,6 +240,31 @@ def _split_train_val(data_dir: Path, val_ratio: float = 0.15):
     val_count = max(1, int(len(label_files) * val_ratio))
     for f in label_files[:val_count]:
         f.rename(val_label_dir / f.name)
+
+
+def _link_images(data_dir: Path):
+    """Copy infrared images into images/ to match YOLO label splits."""
+    import shutil
+
+    for split in ['train', 'val', 'test']:
+        img_dir = data_dir / 'images' / split
+        img_dir.mkdir(parents=True, exist_ok=True)
+        label_dir = data_dir / 'labels' / split
+        if not label_dir.exists():
+            continue
+
+        # train/val labels both map to infrared/train images;
+        # test labels map to infrared/test images
+        ir_source = data_dir / 'infrared' / ('test' if split == 'test' else 'train')
+
+        for label_file in label_dir.glob('*.txt'):
+            for ext in ('.jpg', '.png', '.jpeg'):
+                src = ir_source / (label_file.stem + ext)
+                if src.exists():
+                    dst = img_dir / (label_file.stem + ext)
+                    if not dst.exists():
+                        shutil.copy2(src, dst)
+                    break
 
 
 def train(args):
