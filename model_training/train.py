@@ -34,7 +34,7 @@ def load_config(config_path: str) -> dict:
         return yaml.safe_load(f)
 
 
-def build_enhanced_model(cfg: dict, device: str = '0') -> DetectionModel:
+def build_enhanced_model(cfg: dict, device: int = 0) -> DetectionModel:
     """
     Build enhanced YOLOv8 model with custom modules injected.
 
@@ -288,7 +288,7 @@ def train(args):
             yolo_model = YOLO(resume)
             LOGGER.info(f'Resuming training from checkpoint: {resume}')
     else:
-        model = build_enhanced_model(cfg, device=str(train_cfg.get('device', '0')))
+        model = build_enhanced_model(cfg, device=train_cfg.get('device', 0))
         yolo_model = YOLO(model_cfg["pretrained_weights"])
         yolo_model.model = model
 
