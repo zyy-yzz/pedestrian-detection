@@ -261,7 +261,8 @@ def train(args):
             LOGGER.info(f'Resuming training from checkpoint: {resume}')
     else:
         model = build_enhanced_model(cfg, device=str(train_cfg.get('device', '0')))
-        yolo_model = YOLO(model=model)
+        yolo_model = YOLO(model_cfg["pretrained_weights"])
+        yolo_model.model = model
 
     # Train
     results = yolo_model.train(
